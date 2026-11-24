@@ -158,8 +158,13 @@ jobs:
         with:
           name: allure-report
           path: allure-report/
+      # Um nome por tentativa: ao refazer só este job (re-run), o envio anterior
+      # continua na mesma execução, e dois envios com o mesmo nome travam a publicação.
       - uses: actions/upload-pages-artifact@v3
         with:
           path: allure-report/
+          name: github-pages-${{ github.run_attempt }}
       - id: deploy
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
