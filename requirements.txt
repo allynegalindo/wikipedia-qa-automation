@@ -1,0 +1,8 @@
+Appium-Python-Client==6.1.7
+allure-pytest==2.16.2
+httpx==0.28.1
+playwright==1.65.2
+pydantic==2.14.3
+pytest==9.2.0
+pytest-playwright==0.10.0
+ruff==0.17.5
