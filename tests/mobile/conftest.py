@@ -1,5 +1,6 @@
 import os
 
+import allure
 import httpx
 import pytest
 from appium import webdriver
@@ -48,9 +49,16 @@ def driver(settings):
     opcoes.set_capability("appium:uiautomator2ServerLaunchTimeout", 120000)
 
     driver = webdriver.Remote(settings.appium_url, options=opcoes)
-    # Dicas que o app mostra só no primeiro uso: resolvidas uma vez, aqui.
-    OnboardingScreen(driver).concluir()
-    HomeScreen(driver).dispensar_sugestao_do_widget()
+    try:
+        # Dicas que o app mostra só no primeiro uso: resolvidas uma vez, aqui.
+        OnboardingScreen(driver).concluir()
+        HomeScreen(driver).dispensar_sugestao_do_widget()
+    except Exception:
+        # Sem isto, uma falha na preparação não deixaria nenhuma evidência no relatório.
+        anexar_print(driver.get_screenshot_as_png(), "Tela quando a preparação do app falhou")
+        allure.attach(driver.page_source, name="Elementos da tela", attachment_type=allure.attachment_type.XML)
+        driver.quit()
+        raise
     yield driver
     driver.quit()
 

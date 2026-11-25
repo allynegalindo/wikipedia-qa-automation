@@ -1,8 +1,13 @@
+from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 TEMPO_PADRAO = 20
+
+# Botão "Aguarde" do aviso "O app não está respondendo", do próprio Android.
+# O ID é do sistema, então funciona em qualquer idioma.
+BOTAO_AGUARDAR_APP_TRAVADO = (AppiumBy.ID, "android:id/aerr_wait")
 
 
 class BaseScreen:
@@ -16,7 +21,16 @@ class BaseScreen:
         self.driver = driver
 
     def _esperar(self, locator, tempo=TEMPO_PADRAO):
-        return WebDriverWait(self.driver, tempo).until(EC.visibility_of_element_located(locator))
+        elemento_visivel = EC.visibility_of_element_located(locator)
+
+        def condicao(driver):
+            # Em emuladores lentos, o Android às vezes avisa que o app travou.
+            # Esperar é a resposta certa: o app volta a responder logo depois.
+            for aviso in driver.find_elements(*BOTAO_AGUARDAR_APP_TRAVADO):
+                aviso.click()
+            return elemento_visivel(driver)
+
+        return WebDriverWait(self.driver, tempo).until(condicao)
 
     def tocar(self, locator):
         self._esperar(locator).click()
