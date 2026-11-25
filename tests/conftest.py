@@ -1,7 +1,19 @@
+import unicodedata
+
 import pytest
 
 from config.settings import carregar_settings
 from services.wikipedia_api import WikipediaApi
+
+
+def pytest_make_parametrize_id(config, val, argname):
+    """Gera os nomes dos testes parametrizados sem acentos.
+
+    Por padrão, o pytest escreve "São Paulo" como "S\\xe3o Paulo" no nome do teste.
+    """
+    if isinstance(val, str):
+        return unicodedata.normalize("NFKD", val).encode("ascii", "ignore").decode()
+    return None
 
 
 @pytest.hookimpl(wrapper=True, tryfirst=True)
